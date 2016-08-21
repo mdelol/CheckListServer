@@ -4,8 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.Contexts;
+using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Task = DAL.Models.Task;
 
 namespace CheckListServer.Controllers
@@ -15,21 +17,26 @@ namespace CheckListServer.Controllers
     {
         private readonly ProjectContext _context;
 
+        private User CurrentUser
+        {
+            get
+            {
+                return _context.Users.Include(x => x.Tasks).FirstOrDefault(x => x.UserName == User.Identity.Name);
+            }
+        }
+
         public ValuesController(ProjectContext context)
         {
             _context = context;
         }
 
-        // GET api/values
         [HttpGet]
         public IEnumerable<Task> Get()
         {
-            var identity = User.Identity as MyIdentity;
-          Console.WriteLine($"Name: {identity?.User.UserName}");
-            return identity?.User.Tasks;
+            Console.WriteLine($"Name: {CurrentUser?.UserName}");
+            return CurrentUser?.Tasks;
         }
 
-        // GET api/values/5
         [HttpGet("{id}")]
         public Task Get(int id)
         {
@@ -40,7 +47,7 @@ namespace CheckListServer.Controllers
         [HttpPost]
         public void Post([FromBody]Task value)
         {
-            _context.Tasks.Add(value);
+            CurrentUser?.Tasks.Add(value);
             _context.SaveChanges();
         }
 
