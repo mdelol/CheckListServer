@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using DAL.Contexts;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,7 +52,13 @@ namespace CheckListServer
 #endif
 
 
-      services.AddMvc();
+      services.AddMvc(config =>
+      {
+        var policy = new AuthorizationPolicyBuilder()
+          .RequireAuthenticatedUser()
+          .Build();
+        config.Filters.Add(new AuthorizeFilter(policy));
+      });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
@@ -73,39 +81,6 @@ namespace CheckListServer
       app.UseApplicationInsightsExceptionTelemetry();
 
       app.UseMvc();
-    }
-  }
-
-  public class MyTicketStore : ITicketStore
-  {
-    public Task StoreAsync(AuthenticationTicket ticket)
-    {
-      throw new NotImplementedException();
-    }
-
-    public Task RemoveAsync(string key)
-    {
-      throw new NotImplementedException();
-    }
-
-    public Task RetrieveAsync(string key)
-    {
-      throw new NotImplementedException();
-    }
-
-    public Task RenewAsync(string key, AuthenticationTicket ticket)
-    {
-      throw new NotImplementedException();
-    }
-
-    Task<string> ITicketStore.StoreAsync(AuthenticationTicket ticket)
-    {
-      throw new NotImplementedException();
-    }
-
-    Task<AuthenticationTicket> ITicketStore.RetrieveAsync(string key)
-    {
-      throw new NotImplementedException();
     }
   }
 }

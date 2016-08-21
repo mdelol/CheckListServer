@@ -11,7 +11,6 @@ using Task = DAL.Models.Task;
 namespace CheckListServer.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
     public class ValuesController : Controller
     {
         private readonly ProjectContext _context;
@@ -23,10 +22,11 @@ namespace CheckListServer.Controllers
 
         // GET api/values
         [HttpGet]
-        public IEnumerable<Task> Get([FromHeader, Required]string userToken)
+        public IEnumerable<Task> Get()
         {
-            var identity = User.Identity;
-            return _context.Tasks;
+            var identity = User.Identity as MyIdentity;
+          Console.WriteLine($"Name: {identity?.User.UserName}");
+            return identity?.User.Tasks;
         }
 
         // GET api/values/5
