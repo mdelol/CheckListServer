@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Threading.Tasks;
 using DAL.Contexts;
 using DAL.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Task = DAL.Models.Task;
@@ -40,7 +37,7 @@ namespace CheckListServer.Controllers
         [HttpGet("{id}")]
         public Task Get(int id)
         {
-            return _context.Tasks.First(x => x.TaskId == id);
+            return CurrentUser?.Tasks.First(x => x.TaskId == id);
         }
 
         // POST api/values
@@ -51,16 +48,34 @@ namespace CheckListServer.Controllers
             _context.SaveChanges();
         }
 
-        // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public ObjectResult Put(int id, [FromBody]Task value)
         {
+            var task = CurrentUser?.Tasks.FirstOrDefault(x => x.TaskId == id);
+            if (task == null)
+            {
+                return NotFound(id);
+            }
+            task.Description = value.Description;
+            task.IsCompleted = value.IsCompleted;
+            _context.SaveChanges();
+
+            return new ObjectResult(task);
         }
 
-        // DELETE api/values/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public ActionResult Delete(int id)
         {
+            var firstOrDefault = CurrentUser?.Tasks.FirstOrDefault(x=>x.TaskId == id);
+            if (firstOrDefault == null)
+            {
+                return NotFound(id);
+            }
+
+            CurrentUser?.Tasks.Remove(firstOrDefault);
+            _context.Tasks.Remove(firstOrDefault);
+            _context.SaveChanges();
+            return Ok();
         }
     }
 }
