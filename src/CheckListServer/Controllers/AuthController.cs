@@ -57,11 +57,4 @@ namespace CheckListServer.Controllers
             return "true";
         }
     }
-
-    public class UserInfo
-    {
-        public string Name { get; set; }
-
-        public string Password { get; set; }
-    }
 }
